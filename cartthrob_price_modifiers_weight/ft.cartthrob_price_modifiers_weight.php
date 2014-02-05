@@ -9,7 +9,7 @@ require_once PATH_THIRD.'cartthrob/fieldtypes/ft.cartthrob_matrix.php';
  * @property Cartthrob_cart $cart
  * @property Cartthrob_store $store
  */
-class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
+class Cartthrob_price_modifiers_weight_ft extends Cartthrob_matrix_ft
 {
 	public $info = array(
 		'name' => 'CartThrob Price and Weight Modifiers',
