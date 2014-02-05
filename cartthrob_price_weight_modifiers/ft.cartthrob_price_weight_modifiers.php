@@ -23,6 +23,11 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 		'weight'	=> '',
 	);
 	
+	public function __construct()
+	{
+		parent::__construct();
+	}
+	
 	public function pre_process($data)
 	{
 		$data = parent::pre_process($data);
@@ -51,6 +56,7 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 				$row['price_plus_tax'] = $row['price:plus_tax'] = $this->EE->number->format($row['price_plus_tax']);
 			}
 		}
+		$this->EE->load->remove_package_path(PATH_THIRD.'cartthrob/');
 		
 		return $data;
 	}
@@ -67,13 +73,15 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 	
 	public function display_field($data, $replace_tag = FALSE)
 	{
+		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/');
+
 		$this->EE->lang->loadfile('cartthrob', 'cartthrob');
 		
-		$this->EE->load->library('cartthrob_loader');
+		$this->EE->load->model('cartthrob_settings_model');
 		
 		$this->EE->load->helper('html');
 		
-		if ( ! $presets = $this->EE->cartthrob->store->config('price_modifier_presets'))
+		if ( ! $presets = $this->EE->config->item('cartthrob:price_modifier_presets'))
 		{
 			$presets = array();
 		}
@@ -106,12 +114,14 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 		
 		$channel_id = $this->EE->input->get('channel_id'); 
 
-		if ( ! $channel_id  && isset($this->EE->safecracker))
+		if ( ! $channel_id  && isset($this->EE->channel_form))
 		{
- 			$channel_id = $this->EE->safecracker->channel('channel_id');
+ 			$channel_id = $this->EE->channel_form->channel('channel_id');
 		}
 		
-		if ($channel_id && $this->field_id == $this->EE->cartthrob->store->config('product_channel_fields', $channel_id, 'inventory'))
+		$this->EE->load->helper('data_formatting');
+		
+		if ($channel_id && $this->field_id == array_value($this->EE->config->item('cartthrob:product_channel_fields'), $channel_id, 'inventory'))
 		{
 			$this->default_row['inventory'] = '';
 		}
@@ -122,13 +132,13 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 			$url = (REQ === 'CP') ? 'EE.BASE+"&C=addons_modules&M=show_module_cp&module=cartthrob&method=save_price_modifier_presets_action"'
 					     : 'EE.BASE+"ACT="+'.$this->EE->functions->fetch_action_id('Cartthrob_mcp', 'save_price_modifier_presets_action');
 			
-			$this->EE->cp->add_to_head('
+			$this->EE->cp->add_to_foot('
 			<script type="text/javascript">
 			$.cartthrobPriceModifiers = {
 				currentPreset: function(e) {
 					return $(e).next("div.cartthrobMatrixControls").find("ul.cartthrobMatrixPresets select").val() || "";
 				},
-				presets: '.$this->EE->javascript->generate_json($json_presets, TRUE).',
+				presets: '.json_encode($json_presets).',
 				savePreset: function(e) {
 					var currentValue = (this.presets[this.currentPreset(e)] !== undefined) ? this.presets[this.currentPreset(e)].name : "";
 					var name = prompt("'.$this->EE->lang->line('name_preset_prompt').'", currentValue);
@@ -177,6 +187,7 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 			
 			$this->EE->session->cache['cartthrob_price_modifiers']['head'] = TRUE;
 		}
+		$this->EE->load->remove_package_path(PATH_THIRD.'cartthrob/');
 		
 		return parent::display_field($data, $replace_tag);
 	}
