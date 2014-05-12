@@ -22,7 +22,10 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 		'price' => '',
 		'weight'	=> '',
 	);
-	
+	public function __construct()
+	{
+		parent::__construct();
+	}
 	public function pre_process($data)
 	{
 		$data = parent::pre_process($data);
@@ -51,6 +54,7 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 				$row['price_plus_tax'] = $row['price:plus_tax'] = $this->EE->number->format($row['price_plus_tax']);
 			}
 		}
+		$this->EE->load->remove_package_path(PATH_THIRD.'cartthrob/');
 		
 		return $data;
 	}
@@ -67,6 +71,8 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 	
 	public function display_field($data, $replace_tag = FALSE)
 	{
+		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/');
+		
 		$this->EE->lang->loadfile('cartthrob', 'cartthrob');
 		
 		$this->EE->load->library('cartthrob_loader');
@@ -177,6 +183,7 @@ class Cartthrob_price_weight_modifiers_ft extends Cartthrob_matrix_ft
 			
 			$this->EE->session->cache['cartthrob_price_modifiers']['head'] = TRUE;
 		}
+		$this->EE->load->remove_package_path(PATH_THIRD.'cartthrob/');
 		
 		return parent::display_field($data, $replace_tag);
 	}
